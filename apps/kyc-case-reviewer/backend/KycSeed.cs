@@ -3,13 +3,16 @@ using Barebone.Platform.Abstractions;
 
 namespace Kyc.CaseReviewer;
 
-/// <summary>Deterministic synthetic seed: 12 cases with a mix of statuses and assignments.</summary>
+/// <summary>Deterministic synthetic seed: 15 cases with a mix of statuses and assignments.</summary>
 internal static class KycSeed
 {
     private sealed record Plan(string Status, string? Assigned, string? PreparedBy, string? Recommendation, string? DeciderId);
 
     private static readonly Plan[] Plans =
     [
+        new(KycStatus.New, null, null, null, null),
+        new(KycStatus.New, null, null, null, null),
+        new(KycStatus.New, null, null, null, null),
         new(KycStatus.New, null, null, null, null),
         new(KycStatus.New, null, null, null, null),
         new(KycStatus.New, null, null, null, null),

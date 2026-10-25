@@ -14,7 +14,8 @@ import {
   makeStyles,
   tokens,
 } from '@fluentui/react-components';
-import { ApiError, api, useOptionalSession } from '@platform/sdk';
+import { ApiError, api, setCsrfToken, useOptionalSession } from '@platform/sdk';
+import type { SessionInfo } from '@platform/sdk';
 
 interface DevUser {
   id: string;
@@ -67,6 +68,9 @@ export default function LoginPicker() {
       if (session) {
         await session.login(userId);
       } else {
+        // Login is state-changing, so it needs the pre-session CSRF token even without a SessionProvider.
+        const pre = await api.get<SessionInfo>('/api/session');
+        setCsrfToken(pre.csrfToken);
         await api.post('/api/auth/login', { userId });
       }
     } catch (err) {
