@@ -1,0 +1,50 @@
+using Barebone.Platform.Abstractions;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.EntityFrameworkCore;
+
+namespace __ASSEMBLY__;
+
+/// <summary>Entry point discovered by the platform via platform.yaml (backend.assembly).</summary>
+public sealed class __PASCAL__App : IPlatformApp
+{
+    public string Slug => "__SLUG__";
+
+    public void ConfigureModel(ModelBuilder modelBuilder)
+    {
+        ArgumentNullException.ThrowIfNull(modelBuilder);
+        modelBuilder.Entity<__PASCAL__Item>(e =>
+        {
+            e.ToTable("__TABLE_PREFIX___items");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Title).HasMaxLength(500);
+            e.Property(x => x.Status).HasMaxLength(32);
+        });
+    }
+
+    public void MapEndpoints(RouteGroupBuilder group)
+    {
+        // Every endpoint must declare RequireAction (deny by default). Writes go through IUnitOfWork, e.g.:
+        // group.MapPost("/items", (ItemCreate body, IUnitOfWork uow, CancellationToken ct) => uow.ExecuteAsync(
+        //     new UnitOfWorkContext("item.create", "item"), (scope, _) => { ... scope.Add(item); ... }, ct))
+        //     .RequireAction("item.create");
+        group.MapGet("/items", async (IAppData data, CancellationToken ct) =>
+                Results.Ok(await data.Query<__PASCAL__Item>()
+                    .OrderByDescending(x => x.CreatedAt)
+                    .Take(100)
+                    .ToListAsync(ct)))
+            .RequireAction("item.list");
+    }
+
+    public Task SeedAsync(ISeedContext context, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(context);
+        foreach (var item in context.Generator.Generate<__PASCAL__Item>(10))
+        {
+            context.Scope.Add(item);
+        }
+
+        return Task.CompletedTask;
+    }
+}

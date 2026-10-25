@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/platform/">
+    <Project Path="platform/backend/Platform/Barebone.Platform.csproj" />
+    <Project Path="platform/host/Barebone.Platform.Host.csproj" />
+  </Folder>
+  <Folder Name="/apps/">
+    <Project Path="apps/barebone-builder/backend/Barebone.Builder.csproj" />
+    <Project Path="apps/kyc-case-reviewer/backend/Kyc.CaseReviewer.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Platform.Tests/Platform.Tests.csproj" />
+  </Folder>
+</Solution>

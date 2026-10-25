@@ -1,0 +1,41 @@
+app: barebone-builder
+rules:
+  # Listing is allowed for both roles; the handler filters rows with intake.view, so Requesters only see their own.
+  - action: intake.list
+    effect: allow
+    roles: [Requester, Builder]
+  - action: intake.view
+    effect: allow
+    roles: [Builder]
+  - action: intake.view
+    effect: allow
+    roles: [Requester]
+    when: { allOf: [ { attr: resource.requesterId, op: eq, value: $user.id } ] }
+  - action: intake.create
+    effect: allow
+    roles: [Requester, Builder]
+  - action: intake.approve
+    effect: allow
+    roles: [Builder]
+  - action: intake.approve
+    effect: deny
+    roles: ["*"]
+    when: { allOf: [ { attr: resource.requesterId, op: eq, value: $user.id } ] }
+    reason: maker-checker
+  - action: app.stage.set
+    effect: allow
+    roles: [Builder]
+  - action: app.access.set
+    effect: allow
+    roles: [Builder]
+  # The portal itself is a bootstrap app: nobody may restage it or edit its access list at runtime.
+  - action: app.stage.set
+    effect: deny
+    roles: ["*"]
+    when: { allOf: [ { attr: resource.slug, op: eq, value: barebone-builder } ] }
+    reason: bootstrap-app-immutable
+  - action: app.access.set
+    effect: deny
+    roles: ["*"]
+    when: { allOf: [ { attr: resource.slug, op: eq, value: barebone-builder } ] }
+    reason: bootstrap-app-immutable

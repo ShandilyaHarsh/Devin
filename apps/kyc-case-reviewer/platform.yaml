@@ -1,0 +1,16 @@
+schemaVersion: 1
+name: kyc-case-reviewer            # slug ^[a-z][a-z0-9-]{2,40}$, equals folder name
+displayName: KYC Case Reviewer
+description: Review and decide KYC cases with maker-checker.
+owner: { team: kyc-engineering, email: kyc-eng@example.test }
+businessOwner: { name: Head of Compliance Ops, email: compliance-ops@example.test }
+dataClassification: restricted     # public | internal | confidential | restricted
+access: write                      # read-only | write
+stage: builder-only                # initial stage on registration: builder-only | demo | live
+registration: intake               # intake (catalog entry created by Builder approval) | bootstrap (registered at startup)
+roles: [KYC Analyst, KYC Senior Reviewer, Auditor]
+accessList: []                     # user ids; applies in live
+auditedFields: [status, recommendation, decision, assignedAnalystId]
+piiFields: [customerName, dateOfBirth, ssnLast4]
+cardData: none                     # must be "none" (zero-PAN rule)
+backend: { assembly: Kyc.CaseReviewer }

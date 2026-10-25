@@ -1,0 +1,13 @@
+{
+  "users": [
+    { "id": "u-alice", "displayName": "Alice Ops", "email": "alice@example.test", "roles": ["Requester"] },
+    { "id": "u-bob", "displayName": "Bob Builder", "email": "bob@example.test", "roles": ["Builder"] },
+    { "id": "u-bianca", "displayName": "Bianca Builder", "email": "bianca@example.test", "roles": ["Builder"] },
+    { "id": "u-carol", "displayName": "Carol Analyst", "email": "carol@example.test", "roles": ["KYC Analyst"] },
+    { "id": "u-dan", "displayName": "Dan Analyst", "email": "dan@example.test", "roles": ["KYC Analyst"] },
+    { "id": "u-erin", "displayName": "Erin Senior", "email": "erin@example.test", "roles": ["KYC Senior Reviewer"] },
+    { "id": "u-grace", "displayName": "Grace Dual", "email": "grace@example.test", "roles": ["KYC Analyst", "KYC Senior Reviewer"] },
+    { "id": "u-frank", "displayName": "Frank Auditor", "email": "frank@example.test", "roles": ["Auditor"] },
+    { "id": "u-mallory", "displayName": "Mallory Outsider", "email": "mallory@example.test", "roles": [] }
+  ]
+}

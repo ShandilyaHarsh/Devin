@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>Barebone.Builder</RootNamespace>
+    <AssemblyName>Barebone.Builder</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../../platform/backend/Platform/Barebone.Platform.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="../platform.yaml" Link="apps/barebone-builder/platform.yaml" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../policy.yaml" Link="apps/barebone-builder/policy.yaml" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

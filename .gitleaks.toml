@@ -1,0 +1,46 @@
+# gitleaks configuration (https://github.com/gitleaks/gitleaks), used locally and in .github/workflows/ci.yml:
+#   gitleaks git --config .gitleaks.toml --redact -v
+title = "barebone gitleaks config"
+
+# Keep every built-in rule (cloud keys, tokens, private keys, ...).
+[extend]
+useDefault = true
+
+# Zero-PAN rule: no card-number-like value may ever be committed, not even a well-known test PAN.
+# Matches 13-19 digits, optionally grouped with single spaces or dashes, not embedded in a longer alphanumeric token.
+[[rules]]
+id = "zero-pan-card-number"
+description = "Card-number-like sequence (13-19 digits). This repo is zero-PAN: no card numbers, real or test."
+regex = '''(?:^|[^0-9A-Za-z_.])((?:[0-9][ -]?){12,18}[0-9])(?:[^0-9A-Za-z_]|$)'''
+secretGroup = 1
+tags = ["pci", "zero-pan"]
+
+  # Obviously-fake documentation values only: runs made entirely of zeros or of nines.
+  [[rules.allowlists]]
+  description = "Obviously fake all-zero / all-nine examples"
+  regexTarget = "secret"
+  regexes = ['''^[0 -]+$''', '''^[9 -]+$''']
+
+# The audit hash-chain key must never be committed (only an empty placeholder in .env.example).
+[[rules]]
+id = "audit-chain-key-assignment"
+description = "Platform AuditChainKey assigned a literal value"
+regex = '''(?i)AuditChainKey["']?[ \t]*[:=][ \t]*["']?([A-Za-z0-9+/=_-]{8,})'''
+secretGroup = 1
+keywords = ["auditchainkey"]
+tags = ["secret", "audit"]
+
+# npm lockfile Subresource-Integrity hashes are public content hashes, not secrets.
+[[allowlists]]
+description = "package-lock.json integrity hashes"
+condition = "AND"
+paths = ['''(^|/)package-lock\.json$''']
+regexTarget = "line"
+regexes = ['''^\s*"integrity":\s*"sha(1|256|384|512)-[A-Za-z0-9+/=]+",?\s*$''']
+
+# Idempotency-Key values are request de-duplication ids, not credentials (generic-api-key matches them in tests).
+[[allowlists]]
+description = "Idempotency-Key header/option values"
+targetRules = ["generic-api-key"]
+regexTarget = "line"
+regexes = ['''(?i)idempotency-?key['"]?\s*:\s*['"][A-Za-z0-9-]{8,128}['"]''']

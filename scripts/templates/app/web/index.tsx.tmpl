@@ -1,0 +1,47 @@
+import { useEffect, useState } from 'react';
+import { api, ApiError, AccessDenied, Page } from '@platform/sdk';
+import type { AppModule } from '@platform/sdk';
+
+interface Item {
+  id: string;
+  title: string;
+  status: string;
+  createdAt: string;
+}
+
+function ItemList() {
+  const [items, setItems] = useState<Item[] | null>(null);
+  const [error, setError] = useState<ApiError | null>(null);
+
+  useEffect(() => {
+    api
+      .get<Item[]>('/api/apps/__SLUG__/items')
+      .then(setItems)
+      .catch((e: unknown) => setError(e instanceof ApiError ? e : null));
+  }, []);
+
+  if (error?.status === 403) return <AccessDenied reason={error.problem?.reason} />;
+  return (
+    <Page title="__DISPLAY_NAME__">
+      {items === null ? (
+        <p>Loading…</p>
+      ) : (
+        <ul>
+          {items.map((i) => (
+            <li key={i.id}>
+              {i.title} ({i.status})
+            </li>
+          ))}
+        </ul>
+      )}
+    </Page>
+  );
+}
+
+const app: AppModule = {
+  slug: '__SLUG__',
+  displayName: '__DISPLAY_NAME__',
+  routes: [{ path: '', element: <ItemList />, navLabel: 'Items' }],
+};
+
+export default app;
