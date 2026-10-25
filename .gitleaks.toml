@@ -37,3 +37,10 @@ condition = "AND"
 paths = ['''(^|/)package-lock\.json$''']
 regexTarget = "line"
 regexes = ['''^\s*"integrity":\s*"sha(1|256|384|512)-[A-Za-z0-9+/=]+",?\s*$''']
+
+# Idempotency-Key values are request de-duplication ids, not credentials (generic-api-key matches them in tests).
+[[allowlists]]
+description = "Idempotency-Key header/option values"
+targetRules = ["generic-api-key"]
+regexTarget = "line"
+regexes = ['''(?i)idempotency-?key['"]?\s*:\s*['"][A-Za-z0-9-]{8,128}['"]''']
