@@ -1,0 +1,5 @@
+<Solution>
+  <Folder Name="/platform/">
+    <Project Path="platform/backend/Platform/Barebone.Platform.csproj" />
+  </Folder>
+</Solution>
