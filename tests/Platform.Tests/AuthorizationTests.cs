@@ -124,7 +124,7 @@ public sealed class AuthorizationTests(KycLiveFactory factory) : IClassFixture<K
     [Fact]
     public async Task AuditorIsReadOnly()
     {
-        var caseId = await factory.TakeUnassignedCaseAsync();
+        var caseId = await factory.AnyCaseAsync();
         using var frank = await factory.LoginAsAsync(Users.Frank);
         var detail = await frank.GetJsonAsync($"{Paths.Kyc}/cases/{caseId}");
         Assert.Equal(caseId, detail.Id());
