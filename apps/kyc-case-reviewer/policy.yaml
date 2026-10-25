@@ -67,12 +67,11 @@ rules:
         - { attr: resource.status, op: in, value: [new, in-review] }
 
   # --- case.decide (checker) ---
+  # Status (pending-senior-review) is enforced by the handler inside the UnitOfWork (409), so an
+  # identical retry of a completed decision still passes authz and gets the stored idempotent replay.
   - action: case.decide
     effect: allow
     roles: [KYC Senior Reviewer]
-    when:
-      allOf:
-        - { attr: resource.status, op: eq, value: pending-senior-review }
   - action: case.decide
     effect: deny
     roles: ["*"]
