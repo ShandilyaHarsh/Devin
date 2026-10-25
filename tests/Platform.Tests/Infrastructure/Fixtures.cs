@@ -46,6 +46,15 @@ public sealed class KycLiveFactory : PlatformFactory, IAsyncLifetime
 
     Task IAsyncLifetime.DisposeAsync() => Task.CompletedTask;
 
+    /// <summary>Any seeded case id, for tests that only perform reads or expect denials (no state change).</summary>
+    public async Task<string> AnyCaseAsync()
+    {
+        using var erin = await LoginAsAsync(Users.Erin);
+        var cases = await Scenario.ListCasesAsync(erin);
+        Assert.NotEmpty(cases);
+        return cases[0].Id();
+    }
+
     /// <summary>A seeded case that is unassigned and new, not handed out to another test in this class.</summary>
     public async Task<string> TakeUnassignedCaseAsync()
     {

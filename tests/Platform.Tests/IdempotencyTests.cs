@@ -73,20 +73,22 @@ public sealed class IdempotencyTests(PlatformFactory factory) : IClassFixture<Pl
     [Fact]
     public async Task KeysAreScopedPerUser()
     {
-        // Same key used by another user must not replay alice's response to bob.
+        // Bob reuses alice's key with a different body: a per-user key scope must treat it as a fresh request
+        // (a global scope would answer 422 or replay alice's response).
         using var alice = await factory.LoginAsAsync(Users.Alice);
         using var bob = await factory.LoginAsAsync(Users.Bob);
         var key = PlatformClient.NewKey();
-        var slug = "idem-scope-" + Guid.NewGuid().ToString("N")[..8];
-        var body = Scenario.IntakeBody(slug, "internal", "read-only");
-        var aliceIntake = await alice.PostJsonAsync(Paths.Builder + "/intakes", body, key);
+        var aliceSlug = "idem-scope-a-" + Guid.NewGuid().ToString("N")[..8];
+        var bobSlug = "idem-scope-b-" + Guid.NewGuid().ToString("N")[..8];
+        var aliceIntake = await alice.PostJsonAsync(Paths.Builder + "/intakes", Scenario.IntakeBody(aliceSlug, "internal", "read-only"), key);
 
-        using var bobResponse = await bob.PostAsync(Paths.Builder + "/intakes", body, key);
+        using var bobResponse = await bob.PostAsync(Paths.Builder + "/intakes", Scenario.IntakeBody(bobSlug, "internal", "read-only"), key);
         var bobText = await bobResponse.Content.ReadAsStringAsync();
         Assert.True(bobResponse.IsSuccessStatusCode, bobText);
         Assert.False(bobResponse.Headers.TryGetValues("Idempotency-Replayed", out var h) && h.Contains("true"));
         var bobIntake = Json.Parse(bobText);
         Assert.NotEqual(aliceIntake.Id(), bobIntake.Id());
+        Assert.Equal(bobSlug, bobIntake.Str("appSlug"));
         Assert.Equal(Users.Bob, bobIntake.Str("requesterId"));
     }
 }
