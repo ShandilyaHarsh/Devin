@@ -15,7 +15,7 @@ import {
   makeStyles,
   tokens,
 } from '@fluentui/react-components';
-import { useSession } from '@platform/sdk';
+import { api, useSession } from '@platform/sdk';
 import { useCatalog } from './useCatalog';
 
 const useStyles = makeStyles({
@@ -25,10 +25,16 @@ const useStyles = makeStyles({
     alignItems: 'center',
     gap: tokens.spacingHorizontalL,
     padding: `${tokens.spacingVerticalS} ${tokens.spacingHorizontalXL}`,
-    backgroundColor: tokens.colorBrandBackground,
-    color: tokens.colorNeutralForegroundOnBrand,
+    backgroundColor: tokens.colorNeutralBackground1,
+    borderBottom: `1px solid ${tokens.colorNeutralStroke2}`,
+    boxShadow: tokens.shadow2,
   },
-  brand: { fontWeight: tokens.fontWeightSemibold, fontSize: tokens.fontSizeBase500, color: 'inherit', textDecoration: 'none' },
+  brand: {
+    fontWeight: tokens.fontWeightBold,
+    fontSize: tokens.fontSizeBase500,
+    color: tokens.colorBrandForeground1,
+    textDecoration: 'none',
+  },
   nav: { flexGrow: 1 },
   user: { display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalS },
   userText: { display: 'flex', flexDirection: 'column' },
@@ -38,7 +44,7 @@ const useStyles = makeStyles({
 
 export function Layout({ children }: { children: ReactNode }) {
   const styles = useStyles();
-  const { session, logout } = useSession();
+  const { session } = useSession();
   const { entries } = useCatalog();
   const navigate = useNavigate();
   const location = useLocation();
@@ -46,8 +52,15 @@ export function Layout({ children }: { children: ReactNode }) {
   const selected = location.pathname.startsWith('/audit') ? 'audit' : location.pathname === '/' ? 'catalog' : 'app';
 
   const signOut = async () => {
-    await logout();
-    navigate('/login', { replace: true });
+    try {
+      // Not useSession().logout(): re-rendering as anonymous would redirect with the old page in router state.
+      await api.post<void>('/api/auth/logout');
+    } finally {
+      // Full reload drops every piece of in-memory app state (incl. any revealed PII) from the previous user.
+      // Clear router state first so the next user is not sent to the previous user's page.
+      window.history.replaceState(null, '', '/login');
+      window.location.reload();
+    }
   };
 
   return (
@@ -65,8 +78,8 @@ export function Layout({ children }: { children: ReactNode }) {
           </Tab>
           <Menu>
             <MenuTrigger disableButtonEnhancement>
-              <Button appearance="secondary" size="small">
-                Apps
+              <Button appearance="subtle" size="small">
+                Apps ▾
               </Button>
             </MenuTrigger>
             <MenuPopover>

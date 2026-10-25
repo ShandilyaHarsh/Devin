@@ -24,6 +24,7 @@ import type { AuditEvent, AuditVerifyResult, Stage } from './types';
 const useStyles = makeStyles({
   page: { display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalL, padding: tokens.spacingHorizontalXXL },
   mono: { fontFamily: tokens.fontFamilyMonospace, fontSize: tokens.fontSizeBase200 },
+  nowrap: { whiteSpace: 'nowrap', flexShrink: 0 },
   row: { display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalM, flexWrap: 'wrap' },
 });
 
@@ -44,8 +45,9 @@ const stageColor: Record<Stage, BadgeProps['color']> = {
 };
 
 export function StageBadge({ stage }: { stage: Stage }) {
+  const styles = useStyles();
   return (
-    <Badge appearance="tint" color={stageColor[stage] ?? 'subtle'} title={`Stage: ${stage}`}>
+    <Badge className={styles.nowrap} appearance="tint" color={stageColor[stage] ?? 'subtle'} title={`Stage: ${stage}`}>
       {stage}
     </Badge>
   );
