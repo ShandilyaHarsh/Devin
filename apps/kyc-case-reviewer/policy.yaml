@@ -1,0 +1,79 @@
+# Deny by default: any action/role combination not allowed below is denied (no-matching-rule).
+# Requester and users without a KYC role get no rules. Any matching deny rule wins.
+app: kyc-case-reviewer
+rules:
+  # --- case.list: who may open the queue (rows are further filtered by case.view) ---
+  - action: case.list
+    effect: allow
+    roles: [KYC Analyst, KYC Senior Reviewer, Auditor, "platform:builder", "platform:demo-viewer"]
+
+  # --- case.view (masked) ---
+  - action: case.view
+    effect: allow
+    roles: [KYC Analyst]
+    when:
+      anyOf:
+        - { attr: resource.assignedAnalystId, op: eq, value: $user.id }
+        - { attr: resource.assignedAnalystId, op: isNull }
+  - action: case.view
+    effect: allow
+    roles: [KYC Senior Reviewer, Auditor, "platform:builder", "platform:demo-viewer"]
+
+  # --- case.reveal-pii (audited sensitive read) ---
+  - action: case.reveal-pii
+    effect: allow
+    roles: [KYC Senior Reviewer]
+  - action: case.reveal-pii
+    effect: allow
+    roles: [KYC Analyst]
+    when:
+      allOf:
+        - { attr: resource.assignedAnalystId, op: eq, value: $user.id }
+
+  # --- case.assign: an analyst takes an unassigned case ---
+  - action: case.assign
+    effect: allow
+    roles: [KYC Analyst]
+    when:
+      allOf:
+        - { attr: resource.assignedAnalystId, op: isNull }
+
+  # --- case.note.add ---
+  - action: case.note.add
+    effect: allow
+    roles: [KYC Analyst]
+    when:
+      anyOf:
+        - { attr: resource.assignedAnalystId, op: eq, value: $user.id }
+        - { attr: resource.assignedAnalystId, op: isNull }
+  - action: case.note.add
+    effect: allow
+    roles: [KYC Senior Reviewer]
+
+  # --- case.recommend (maker): own or unassigned case, still open ---
+  - action: case.recommend
+    effect: allow
+    roles: [KYC Analyst]
+    when:
+      allOf:
+        - { attr: resource.assignedAnalystId, op: eq, value: $user.id }
+        - { attr: resource.status, op: in, value: [new, in-review] }
+  - action: case.recommend
+    effect: allow
+    roles: [KYC Analyst]
+    when:
+      allOf:
+        - { attr: resource.assignedAnalystId, op: isNull }
+        - { attr: resource.status, op: in, value: [new, in-review] }
+
+  # --- case.decide (checker) ---
+  # Status (pending-senior-review) is enforced by the handler inside the UnitOfWork (409), so an
+  # identical retry of a completed decision still passes authz and gets the stored idempotent replay.
+  - action: case.decide
+    effect: allow
+    roles: [KYC Senior Reviewer]
+  - action: case.decide
+    effect: deny
+    roles: ["*"]
+    when: { allOf: [ { attr: resource.preparedBy, op: eq, value: $user.id } ] }
+    reason: maker-checker

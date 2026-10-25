@@ -1,0 +1,16 @@
+schemaVersion: 1
+name: __SLUG__                     # must equal the folder name under apps/
+displayName: __DISPLAY_NAME__
+description: TODO describe what __DISPLAY_NAME__ does and for whom.
+owner: { team: __SLUG__-team, email: __SLUG__-team@example.test }
+businessOwner: { name: TODO Business Owner, email: __SLUG__-owner@example.test }
+dataClassification: internal       # public | internal | confidential | restricted (piiFields need >= confidential)
+access: read-only                  # read-only | write
+stage: builder-only                # initial stage on registration: builder-only | demo | live
+registration: intake               # catalog entry is created when a Builder approves the intake
+roles: [__ROLE__, Auditor]
+accessList: []                     # user ids; applies in live (set through the Builder)
+auditedFields: [status]
+piiFields: []
+cardData: none                     # must be "none" (zero-PAN rule)
+backend: { assembly: __ASSEMBLY__ }

@@ -1,0 +1,6 @@
+app: __SLUG__
+# Deny by default: anything not allowed here is a 403 (audited). Any matching deny rule wins.
+rules:
+  - action: item.list
+    effect: allow
+    roles: [__ROLE__, Auditor, platform:builder, platform:demo-viewer]
