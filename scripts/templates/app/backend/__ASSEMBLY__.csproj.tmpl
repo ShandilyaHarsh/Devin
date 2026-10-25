@@ -10,7 +10,7 @@
     <ProjectReference Include="../../../platform/backend/Platform/Barebone.Platform.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="../platform.yaml" Link="apps/__SLUG__/platform.yaml" CopyToOutputDirectory="PreserveNewest" />
-    <None Include="../policy.yaml" Link="apps/__SLUG__/policy.yaml" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../platform.yaml" CopyToOutputDirectory="PreserveNewest" TargetPath="apps/__SLUG__/platform.yaml" />
+    <None Include="../policy.yaml" CopyToOutputDirectory="PreserveNewest" TargetPath="apps/__SLUG__/policy.yaml" />
   </ItemGroup>
 </Project>
