@@ -26,11 +26,11 @@ def quote(identifier: str) -> str:
 
 
 def find_audit_table(conn: sqlite3.Connection) -> tuple[str, dict[str, str]]:
-    """Locate the audit table by shape (has id, action, after, prevHash, hash), whatever EF named it."""
+    """Locate the audit table by shape (id, action, after, prev_hash/prevHash, hash), whatever EF named it."""
     tables = [r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type = 'table'")]
     required = {"id", "action", "after", "prevhash", "hash"}
     for table in tables:
-        columns = {r[1].lower(): r[1] for r in conn.execute(f"PRAGMA table_info({quote(table)})")}
+        columns = {r[1].lower().replace("_", ""): r[1] for r in conn.execute(f"PRAGMA table_info({quote(table)})")}
         if required.issubset(columns):
             return table, columns
     sys.exit("error: no audit table found (expected columns id, action, after, prevHash, hash). Run the app first.")
