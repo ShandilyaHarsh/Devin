@@ -1,0 +1,16 @@
+schemaVersion: 1
+name: barebone-builder
+displayName: Barebone Builder
+description: Request, approve, register and stage internal tools on the barebone platform.
+owner: { team: app-factory, email: app-factory@example.test }
+businessOwner: { name: Head of Internal Tools, email: internal-tools@example.test }
+dataClassification: internal
+access: write
+stage: live
+registration: bootstrap
+roles: [Requester, Builder]
+accessList: ["*"]
+auditedFields: [status, decidedBy, decidedAt, rejectReason]
+piiFields: []
+cardData: none
+backend: { assembly: Barebone.Builder }
