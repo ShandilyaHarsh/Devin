@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <RootNamespace>Barebone.Platform.Host</RootNamespace>
+    <AssemblyName>Barebone.Platform.Host</AssemblyName>
+    <UserSecretsId>barebone-platform-host</UserSecretsId>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../backend/Platform/Barebone.Platform.csproj" />
+    <!-- App discovery: every apps/<slug>/backend/*.csproj is referenced; zero apps is fine. -->
+    <ProjectReference Include="../../apps/*/backend/*.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="../../config/dev-directory.json" Link="config/dev-directory.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,11 @@
+app: platform
+rules:
+  - action: catalog.read
+    effect: allow
+    roles: ["*"]
+  - action: audit.read
+    effect: allow
+    roles: [Auditor, Builder]
+  - action: audit.verify
+    effect: allow
+    roles: [Auditor, Builder]
