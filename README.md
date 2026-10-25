@@ -139,7 +139,7 @@ Start fresh: `rm -f platform/host/App_Data/platform.db && scripts/dev.sh`, open 
 8. **Maker-checker.** Log in as **Grace Dual** (Analyst + Senior). Prepare/recommend a case, then try to decide it
    ⇒ **403 `maker-checker`** (audited).
 9. **Erin decides + idempotency.** Log in as **Erin Senior** and approve Carol's case ⇒ `approved`. Click
-   **"resend same key"**: the same `Idempotency-Key` is replayed ⇒ same response, header `Idempotency-Replayed: true`,
+   **"Resend same request (same Idempotency-Key)"**: the same `Idempotency-Key` is replayed ⇒ same response, header `Idempotency-Replayed: true`,
    no second audit row.
 10. **Frank audits.** Log in as **Frank Auditor**, open `/audit`: every success, denial and PII read is listed with its
     hash. Click **Verify audit chain** ⇒ `Chain valid (<n> rows)`.
