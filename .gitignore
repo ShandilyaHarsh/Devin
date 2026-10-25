@@ -16,3 +16,5 @@ App_Data/
 .idea/
 test-results/
 playwright-report/
+__pycache__/
+*.pyc
