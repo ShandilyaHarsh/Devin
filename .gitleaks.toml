@@ -25,7 +25,7 @@ tags = ["pci", "zero-pan"]
 [[rules]]
 id = "audit-chain-key-assignment"
 description = "Platform AuditChainKey assigned a literal value"
-regex = '''(?i)AuditChainKey["']?\s*[:=]\s*["']?([A-Za-z0-9+/=_-]{8,})'''
+regex = '''(?i)AuditChainKey["']?[ \t]*[:=][ \t]*["']?([A-Za-z0-9+/=_-]{8,})'''
 secretGroup = 1
 keywords = ["auditchainkey"]
 tags = ["secret", "audit"]

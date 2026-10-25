@@ -1,0 +1,19 @@
+using Barebone.Platform.Abstractions;
+
+namespace __ASSEMBLY__;
+
+/// <summary>Sample entity. Every property the seeder fills is synthetic; never real data.</summary>
+public sealed class __PASCAL__Item
+{
+    [Synthetic(SyntheticKind.UniqueId)]
+    public string Id { get; set; } = string.Empty;
+
+    [Synthetic(SyntheticKind.Sentence)]
+    public string Title { get; set; } = string.Empty;
+
+    [Synthetic(SyntheticKind.OneOf, "open", "closed")]
+    public string Status { get; set; } = "open";
+
+    [Synthetic(SyntheticKind.PastDate)]
+    public DateTimeOffset CreatedAt { get; set; }
+}
