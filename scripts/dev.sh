@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Local dev runner: ensures a random audit-chain key in .env, builds the SPA, runs the BFF host on :5080.
+# Local dev runner: ensures a random audit-chain key in .env, builds the SPA, runs the BFF host on https://localhost:5443.
+# HTTPS is required: browsers reject __Host- cookies on plain-http origins.
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -7,7 +8,8 @@ cd "${repo_root}"
 
 env_file=".env"
 key_name="Platform__AuditChainKey"
-url="http://localhost:5080"
+url="https://localhost:5443"
+cert_dir=".certs"
 
 for tool in openssl dotnet npm; do
   command -v "${tool}" >/dev/null 2>&1 || { echo "error: '${tool}' is required (see README prerequisites)" >&2; exit 1; }
@@ -44,6 +46,13 @@ export ASPNETCORE_ENVIRONMENT="${ASPNETCORE_ENVIRONMENT:-Development}"
 if [[ ! -d node_modules || package-lock.json -nt node_modules ]]; then
   npm ci
 fi
+# Local HTTPS: ASP.NET Core dev certificate (trusted best-effort), also exported as PEM for Vite (`npm run dev`).
+dotnet dev-certs https >/dev/null
+dotnet dev-certs https --trust >/dev/null 2>&1 || echo "note: could not auto-trust the dev certificate; run 'dotnet dev-certs https --trust' or accept the browser warning." >&2
+if [[ ! -f "${cert_dir}/localhost.pem" || ! -f "${cert_dir}/localhost.key" ]]; then
+  (umask 077 && mkdir -p "${cert_dir}" && dotnet dev-certs https --export-path "${cert_dir}/localhost.pem" --format Pem --no-password >/dev/null)
+fi
+
 npm run build
 
 echo "Starting Barebone host on ${url} (Ctrl+C to stop)"

@@ -1,8 +1,15 @@
+import { existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
-const backend = 'http://localhost:5080';
+const backend = 'https://localhost:5443';
+
+// __Host- cookies need a secure origin, so the dev server also uses HTTPS (cert exported by scripts/dev.sh).
+const certDir = fileURLToPath(new URL('../../.certs/', import.meta.url));
+const https = existsSync(`${certDir}localhost.pem`)
+  ? { cert: readFileSync(`${certDir}localhost.pem`), key: readFileSync(`${certDir}localhost.key`) }
+  : undefined;
 
 export default defineConfig({
   root: fileURLToPath(new URL('.', import.meta.url)),
@@ -15,10 +22,11 @@ export default defineConfig({
   server: {
     port: 5173,
     strictPort: true,
+    https,
     fs: { allow: [fileURLToPath(new URL('../..', import.meta.url))] },
     proxy: {
-      '/api': { target: backend, changeOrigin: false },
-      '/health': { target: backend, changeOrigin: false },
+      '/api': { target: backend, changeOrigin: false, secure: false },
+      '/health': { target: backend, changeOrigin: false, secure: false },
     },
   },
   build: {

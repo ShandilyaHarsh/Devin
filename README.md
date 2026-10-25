@@ -24,13 +24,16 @@ Prerequisites: .NET 10 SDK, Node 24 + npm, `openssl`, `python3` (only for the ta
 
 ```bash
 scripts/dev.sh
-# open http://localhost:5080
+# open https://localhost:5443
 ```
 
 `scripts/dev.sh` (1) creates the gitignored `.env` with a random `Platform__AuditChainKey` (`openssl rand -hex 32`) if
 missing, (2) exports it, (3) runs `npm ci` if needed and `npm run build` (SPA → `platform/host/wwwroot/`), and
-(4) runs `dotnet run --project platform/host` on `http://localhost:5080` (one origin, real CSP).
-For frontend hot reload, run `npm run dev` in a second terminal (Vite on `:5173`, proxies `/api` and `/health` to `:5080`).
+(4) runs `dotnet run --project platform/host` on `https://localhost:5443` (one origin, real CSP).
+Local HTTPS is required, not optional: browsers reject `__Host-` cookies on plain-http origins, so login would fail
+with `403 csrf`. The script creates the ASP.NET Core dev certificate, tries `dotnet dev-certs https --trust`, and exports it
+as PEM to the gitignored `.certs/` for Vite. If your browser still warns, trust the cert or accept the warning once.
+For frontend hot reload, run `npm run dev` in a second terminal (Vite on `:5173`, proxies `/api` and `/health` to `:5443`).
 `.env.example` documents the only required setting; it holds an empty placeholder, never a value.
 
 Dev users (from [`config/dev-directory.json`](config/dev-directory.json); a stand-in for Entra ID groups — pick one on
@@ -54,7 +57,7 @@ the `/login` page):
 flowchart LR
   B[Browser SPA<br/>React + Fluent UI<br/>@platform/sdk] -- "__Host-session cookie<br/>X-CSRF-Token, Idempotency-Key" --> H
 
-  subgraph H[BFF host: platform/host on :5080]
+  subgraph H[BFF host: platform/host on :5443]
     direction TB
     P1[Exception handler<br/>generic problem JSON] --> P2[Security headers + CSP]
     P2 --> P3[Correlation id] --> P4[Session BFF] --> P5[CSRF] --> P6[Rate limiting]
@@ -116,7 +119,7 @@ KYC) code or strings. The host finds apps with a csproj glob (`../../apps/*/back
 
 ## Demo script
 
-Start fresh: `rm -f platform/host/App_Data/platform.db && scripts/dev.sh`, open `http://localhost:5080`.
+Start fresh: `rm -f platform/host/App_Data/platform.db && scripts/dev.sh`, open `https://localhost:5443`.
 
 1. **Alice requests the app.** Log in as **Alice Ops** (Requester). In Barebone Builder, create an intake: title
    "KYC Case Reviewer", slug `kyc-case-reviewer`, data classification `restricted`, access `write`, plus hours saved and

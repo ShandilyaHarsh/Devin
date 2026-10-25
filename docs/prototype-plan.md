@@ -42,8 +42,8 @@ scripts/                           dev.sh, scaffold-app.sh, tamper-audit.py     
   OpenTelemetry (`OpenTelemetry.Extensions.Hosting`, `...Instrumentation.AspNetCore`, `...Exporter.Console`).
 - React 19 + TypeScript + Vite + react-router v7 + Fluent UI v9 (`@fluentui/react-components`).
 - Tests: xUnit + `Microsoft.AspNetCore.Mvc.Testing`; Vitest + @testing-library/react + jsdom.
-- Ports: backend `http://localhost:5080`; Vite dev server `http://localhost:5173` proxies `/api` and `/health` to 5080.
-  For the demo, `npm run build` writes the SPA to `platform/host/wwwroot/` (gitignored) and the host serves it on 5080
+- Ports: backend `https://localhost:5443`; Vite dev server `https://localhost:5173` proxies `/api` and `/health` to 5443.
+  For the demo, `npm run build` writes the SPA to `platform/host/wwwroot/` (gitignored) and the host serves it on 5443
   (single origin, real CSP).
 
 ## 3. Backend architecture
