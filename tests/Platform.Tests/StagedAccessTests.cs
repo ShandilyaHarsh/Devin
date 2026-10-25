@@ -5,7 +5,9 @@ namespace Platform.Tests;
 
 public sealed class StagedAccessTests(PlatformFactory factory) : IClassFixture<PlatformFactory>
 {
-    private async Task<string> DeniedAsync(PlatformClient client, string what)
+    private static readonly string[] Wildcard = ["*"];
+
+    private static async Task<string> DeniedAsync(PlatformClient client, string what)
     {
         using var response = await client.GetAsync(Paths.Kyc + "/cases");
         var text = await response.Content.ReadAsStringAsync();
@@ -87,7 +89,7 @@ public sealed class StagedAccessTests(PlatformFactory factory) : IClassFixture<P
         var intake = await Scenario.SubmitIntakeAsync(alice, slug, "restricted", "read-only");
         await bianca.PostJsonAsync($"{Paths.Builder}/intakes/{intake.Id()}/approve", new { });
 
-        using var response = await bianca.PutAsync($"{Paths.Builder}/apps/{slug}/access-list", new { userIds = new[] { "*" } });
+        using var response = await bianca.PutAsync($"{Paths.Builder}/apps/{slug}/access-list", new { userIds = Wildcard });
         Assert.False(response.IsSuccessStatusCode, "'*' must not be accepted for a restricted app");
         var entry = await bianca.GetJsonAsync("/api/platform/catalog/" + slug);
         Assert.DoesNotContain(entry.GetProperty("accessList").EnumerateArray(), v => v.GetString() == "*");
