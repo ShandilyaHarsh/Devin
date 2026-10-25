@@ -291,3 +291,24 @@ Auditors read-only (list/view masked) + platform audit trail; Requester/others d
 | ci-docs | `.github/**`, `.gitleaks.toml`, `README.md`, `scripts/**` | workflow + docs + scripts |
 | tests | `tests/**` | tests written from requirements in this file |
 The integrator (parent session) reviews each branch, merges into the integration branch and fixes integration issues.
+
+## 7. Frontend component and module contract (exact, tests depend on it)
+- `platform/web/src/sdk/api.ts` exports `api`, `ApiError`, `newIdempotencyKey`, `setCsrfToken(token)`.
+  `api.post(path, body, { idempotencyKey })` sends headers `Content-Type: application/json`, `X-CSRF-Token: <token>`,
+  `Idempotency-Key: <key>`; `api.postWithMeta` returns `{ data, replayed }` (`replayed` from `Idempotency-Replayed: true`).
+  GET requests send neither header. Uses global `fetch` (so tests can stub it).
+- `platform/web/src/sdk/components.tsx` exports:
+  - `StageBadge({ stage })` renders the stage text (`builder-only` / `demo` / `live`).
+  - `AccessDenied({ reason? })` renders the text `Access denied` and the reason if any.
+  - `MaskedValue({ masked, revealed? })` renders `revealed` if given, else `masked`.
+  - `VerifyAuditButton()` a button labelled `Verify audit chain`; on click `GET /api/platform/audit/verify`; then shows
+    `Chain valid (<checked> rows)` or `Chain broken at row #<firstBrokenId>`.
+  - `AuditViewer({ app? })` table of `/api/platform/audit` rows: time, actor, action, resource, outcome, hash (first 12 chars).
+  - `Page({ title, children })`.
+- `platform/web/src/shell/LoginPicker.tsx` default-exports `LoginPicker`: loads `/api/auth/dev-users`, renders one button
+  per user whose accessible name contains the user's `displayName`; click → `POST /api/auth/login {userId}`.
+- `platform/web/src/sdk/index.ts` re-exports everything from `api.ts`, `components.tsx`, `session.tsx` and `types.ts`.
+
+## 8. Branches
+Each sub-session pushes to its own branch (no PR): `devin/proto-platform-backend`, `devin/proto-platform-web`,
+`devin/proto-builder-app`, `devin/proto-kyc-app`, `devin/proto-ci-docs`, `devin/proto-tests`.
