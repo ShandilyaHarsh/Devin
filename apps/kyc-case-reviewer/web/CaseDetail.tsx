@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router';
 import {
   Badge,
@@ -33,7 +33,6 @@ type Feedback = { intent: 'success' | 'error' | 'info'; title: string; text: str
 interface SentDecision {
   key: string;
   body: { decision: string; rationale: string };
-  decisionsBefore: number;
 }
 
 function FeedbackBar({ feedback }: { feedback: Feedback }) {
@@ -71,22 +70,30 @@ export function CaseDetailPage() {
   const [sentDecision, setSentDecision] = useState<SentDecision | null>(null);
   const [replayResult, setReplayResult] = useState<Feedback>(null);
 
-  const load = useCallback(async () => {
-    try {
-      setDetail(await api.get<CaseDetail>(casePath));
-      setLoadError(null);
-    } catch (err) {
-      if (err instanceof ApiError && err.status === 403) {
-        setDenied(explainReason(err.problem?.reason) ?? err.problem?.title ?? 'forbidden');
-      } else {
-        setLoadError(describeError(err));
-      }
-    }
-  }, [casePath]);
+  const [reloads, setReloads] = useState(0);
+  const reload = () => setReloads((n) => n + 1);
 
   useEffect(() => {
-    void load();
-  }, [load]);
+    let cancelled = false;
+    api
+      .get<CaseDetail>(casePath)
+      .then((d) => {
+        if (cancelled) return;
+        setDetail(d);
+        setLoadError(null);
+      })
+      .catch((err: unknown) => {
+        if (cancelled) return;
+        if (err instanceof ApiError && err.status === 403) {
+          setDenied(explainReason(err.problem.reason) ?? err.problem.title ?? 'forbidden');
+        } else {
+          setLoadError(describeError(err));
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [casePath, reloads]);
 
   const run = async (title: string, action: () => Promise<void>) => {
     setBusy(true);
@@ -108,22 +115,22 @@ export function CaseDetailPage() {
 
   const assign = () =>
     run('Assigned to you', async () => {
-      setDetail(await api.post<CaseDetail>(`${casePath}/assign`, {}));
-      await load();
+      await api.post<CaseDetail>(`${casePath}/assign`, {});
+      reload();
     });
 
   const addNote = () =>
     run('Note added', async () => {
       await api.post<CaseDetail>(`${casePath}/notes`, { text: noteText });
       setNoteText('');
-      await load();
+      reload();
     });
 
   const recommend = () =>
     run('Recommendation submitted for senior review', async () => {
       await api.post<CaseDetail>(`${casePath}/recommendation`, { recommendation, rationale: recRationale });
       setRecRationale('');
-      await load();
+      reload();
     });
 
   const decide = () =>
@@ -131,13 +138,12 @@ export function CaseDetailPage() {
       const sent: SentDecision = {
         key: newIdempotencyKey(),
         body: { decision, rationale: decRationale },
-        decisionsBefore: detail?.decisions.length ?? 0,
       };
       await api.postWithMeta<CaseDetail>(`${casePath}/decision`, sent.body, { idempotencyKey: sent.key });
       setSentDecision(sent);
       setReplayResult(null);
       setDecRationale('');
-      await load();
+      reload();
     });
 
   const resend = async () => {

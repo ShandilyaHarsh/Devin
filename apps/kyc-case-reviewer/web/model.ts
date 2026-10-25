@@ -85,8 +85,8 @@ export function explainReason(reason: string | null | undefined): string | null 
 export function describeError(err: unknown): string {
   if (err instanceof ApiError) {
     const problem = err.problem;
-    const reason = explainReason(problem?.reason);
-    const title = problem?.title ?? 'Request failed';
+    const reason = explainReason(problem.reason);
+    const title = problem.title ?? 'Request failed';
     return reason ? `${err.status} ${title} — ${reason}` : `${err.status} ${title}`;
   }
   return err instanceof Error ? err.message : 'Unexpected error';

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router';
 import {
   Badge,
@@ -23,28 +23,35 @@ export function CaseQueue() {
   const [denied, setDenied] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
-    try {
-      setCases(await api.get<CaseSummary[]>(`${API}/cases`));
-      setError(null);
-    } catch (err) {
-      if (err instanceof ApiError && err.status === 403) {
-        setDenied(err.problem?.reason ?? err.problem?.title ?? 'forbidden');
-      } else {
-        setError(describeError(err));
-      }
-    }
-  }, []);
+  const [reloads, setReloads] = useState(0);
 
   useEffect(() => {
-    void load();
-  }, [load]);
+    let cancelled = false;
+    api
+      .get<CaseSummary[]>(`${API}/cases`)
+      .then((rows) => {
+        if (cancelled) return;
+        setCases(rows);
+        setError(null);
+      })
+      .catch((err: unknown) => {
+        if (cancelled) return;
+        if (err instanceof ApiError && err.status === 403) {
+          setDenied(err.problem.reason ?? err.problem.title ?? 'forbidden');
+        } else {
+          setError(describeError(err));
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [reloads]);
 
   const assign = async (id: string) => {
     setBusy(id);
     try {
       await api.post(`${API}/cases/${encodeURIComponent(id)}/assign`, {});
-      await load();
+      setReloads((n) => n + 1);
     } catch (err) {
       setError(describeError(err));
     } finally {
