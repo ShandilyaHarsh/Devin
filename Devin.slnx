@@ -2,4 +2,7 @@
   <Folder Name="/platform/">
     <Project Path="platform/backend/Platform/Barebone.Platform.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Platform.Tests/Platform.Tests.csproj" />
+  </Folder>
 </Solution>
